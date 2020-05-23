@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomePage(),
+      routes: appRoutes,
       navigatorObservers: [routeObserver],
     );
   }
@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage> with RouteAware {
             RaisedButton(
               child: Text('Secound Page'),
               onPressed: () {
-                Navigator.pushReplacementNamed(context, secondRoute);
+                Navigator.pushNamed(context, secondRoute);
               },
             ),
           ],
