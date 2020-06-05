@@ -1,7 +1,16 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:routeobserver/route/route_utils.dart';
+import 'package:routeobserver/service/navigator_middleware.dart';
 
 RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+NavigatorMiddleware<PageRoute> middleware = NavigatorMiddleware<PageRoute>(
+  onPush: (route, previousRoute) {
+    log('we have push event');
+    ///if route is Y we should have some API call
+  },
+);
 
 void main() => runApp(MyApp());
 
@@ -15,7 +24,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       routes: appRoutes,
-      navigatorObservers: [routeObserver],
+      navigatorObservers: [routeObserver, middleware],
     );
   }
 }
@@ -26,7 +35,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with RouteAware {
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();

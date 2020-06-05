@@ -2,11 +2,24 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
+typedef OnRouteChange<R extends Route<dynamic>> = void Function(R route, R previousRoute);
+
 class NavigatorMiddleware<R extends Route<dynamic>> extends NavigatorObserver {
-  NavigatorMiddleware({this.enableLogger = true}) : _stack = [];
+  NavigatorMiddleware({
+    this.enableLogger = true,
+    this.onPush,
+    this.onPop,
+    this.onReplace,
+    this.onRemove,
+  }) : _stack = [];
 
   final List<R> _stack;
   final bool enableLogger;
+
+  final OnRouteChange<R> onPush;
+  final OnRouteChange<R> onPop;
+  final OnRouteChange<R> onReplace;
+  final OnRouteChange<R> onRemove;
 
   //create clone list from stack
   List<R> get stack => List<R>.from(_stack);
@@ -16,6 +29,9 @@ class NavigatorMiddleware<R extends Route<dynamic>> extends NavigatorObserver {
     _logget('{didPush} \n route: $route \n previousRoute: $previousRoute');
     _stack.add(route);
     _logStack();
+    if (onPush != null) {
+      onPush(route, previousRoute);
+    }
     super.didPush(route, previousRoute);
   }
 
@@ -24,6 +40,9 @@ class NavigatorMiddleware<R extends Route<dynamic>> extends NavigatorObserver {
     _logget('{didPop} \n route: $route \n previousRoute: $previousRoute');
     _stack.remove(route);
     _logStack();
+    if (onPop != null) {
+      onPop(route, previousRoute);
+    }
     super.didPop(route, previousRoute);
   }
 
@@ -35,6 +54,9 @@ class NavigatorMiddleware<R extends Route<dynamic>> extends NavigatorObserver {
       _stack[oldItemIndex] = newRoute;
     }
     _logStack();
+    if (onReplace != null) {
+      onReplace(newRoute, oldRoute);
+    }
     super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
   }
 
@@ -43,6 +65,9 @@ class NavigatorMiddleware<R extends Route<dynamic>> extends NavigatorObserver {
     _logget('{didRemove} \n route: $route \n previousRoute: $previousRoute');
     stack.remove(route);
     _logStack();
+    if (onRemove != null) {
+      onRemove(route, previousRoute);
+    }
     super.didRemove(route, previousRoute);
   }
 
