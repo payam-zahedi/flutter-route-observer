@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 typedef OnRouteChange<R extends Route<dynamic>> = void Function(R route, R previousRoute);
 
-class NavigatorMiddleware<R extends Route<dynamic>> extends NavigatorObserver {
+class NavigatorMiddleware<R extends Route<dynamic>> extends RouteObserver<R> {
   NavigatorMiddleware({
     this.enableLogger = true,
     this.onPush,
