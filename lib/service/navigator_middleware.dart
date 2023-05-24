@@ -2,9 +2,10 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
-typedef OnRouteChange<R extends Route<dynamic>> = void Function(R route, R previousRoute);
+typedef OnRouteChange<R extends Route<dynamic>> = void Function(
+    R route, R previousRoute);
 
-class NavigatorMiddleware<R extends Route<dynamic>> extends NavigatorObserver {
+class NavigatorMiddleware<R extends Route<dynamic>> extends RouteObserver<R> {
   NavigatorMiddleware({
     this.enableLogger = true,
     this.onPush,
@@ -16,80 +17,82 @@ class NavigatorMiddleware<R extends Route<dynamic>> extends NavigatorObserver {
   final List<R> _stack;
   final bool enableLogger;
 
-  final OnRouteChange<R> onPush;
-  final OnRouteChange<R> onPop;
-  final OnRouteChange<R> onReplace;
-  final OnRouteChange<R> onRemove;
+  final OnRouteChange<R>? onPush;
+  final OnRouteChange<R>? onPop;
+  final OnRouteChange<R>? onReplace;
+  final OnRouteChange<R>? onRemove;
 
   //create clone list from stack
   List<R> get stack => List<R>.from(_stack);
 
   @override
-  void didPush(Route route, Route previousRoute) {
-    _logget('{didPush} \n route: $route \n previousRoute: $previousRoute');
-    _stack.add(route);
+  void didPush(Route route, Route? previousRoute) {
+    _logger('{didPush} \n route: $route \n previousRoute: $previousRoute');
+    _stack.add(route as R);
     _logStack();
     if (onPush != null) {
-      onPush(route, previousRoute);
+      onPush!(route, previousRoute as R);
     }
     super.didPush(route, previousRoute);
   }
 
   @override
-  void didPop(Route route, Route previousRoute) {
-    _logget('{didPop} \n route: $route \n previousRoute: $previousRoute');
+  void didPop(Route route, Route? previousRoute) {
+    _logger('{didPop} \n route: $route \n previousRoute: $previousRoute');
     _stack.remove(route);
     _logStack();
     if (onPop != null) {
-      onPop(route, previousRoute);
+      onPop!(route as R, previousRoute as R);
     }
     super.didPop(route, previousRoute);
   }
 
   @override
-  void didReplace({Route newRoute, Route oldRoute}) {
-    _logget('{didReplace} \n newRoute: $newRoute \n oldRoute: $oldRoute');
-    if (_stack.indexOf(oldRoute) >= 0) {
-      final oldItemIndex = _stack.indexOf(oldRoute);
-      _stack[oldItemIndex] = newRoute;
+  void didReplace({Route? newRoute, Route? oldRoute}) {
+    _logger('{didReplace} \n newRoute: $newRoute \n oldRoute: $oldRoute');
+    if (_stack.contains(oldRoute)) {
+      final oldItemIndex = _stack.indexOf(oldRoute as R);
+      _stack[oldItemIndex] = newRoute as R;
     }
     _logStack();
     if (onReplace != null) {
-      onReplace(newRoute, oldRoute);
+      onReplace!(newRoute as R, oldRoute as R);
     }
     super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
   }
 
   @override
-  void didRemove(Route route, Route previousRoute) {
-    _logget('{didRemove} \n route: $route \n previousRoute: $previousRoute');
+  void didRemove(Route route, Route? previousRoute) {
+    _logger('{didRemove} \n route: $route \n previousRoute: $previousRoute');
     stack.remove(route);
     _logStack();
     if (onRemove != null) {
-      onRemove(route, previousRoute);
+      onRemove!(route as R, previousRoute as R);
     }
     super.didRemove(route, previousRoute);
   }
 
   @override
-  void didStartUserGesture(Route route, Route previousRoute) {
-    _logget('{didStartUserGesture} \n route: $route \n previousRoute: $previousRoute');
+  void didStartUserGesture(Route route, Route? previousRoute) {
+    _logger(
+        '{didStartUserGesture} \n route: $route \n previousRoute: $previousRoute');
     super.didStartUserGesture(route, previousRoute);
   }
 
   @override
   void didStopUserGesture() {
-    _logget('{didStopUserGesture}');
+    _logger('{didStopUserGesture}');
     super.didStopUserGesture();
   }
 
   void _logStack() {
-    final mappedStack = _stack.map((Route route) => route.settings.name).toList();
+    final mappedStack =
+        _stack.map((Route route) => route.settings.name).toList();
 
-    _logget('Navigator stack: $mappedStack');
+    _logger('Navigator stack: $mappedStack');
   }
 
-  void _logget(String content) {
+  void _logger(String content) {
     if (enableLogger) {
       log(content);
     }
