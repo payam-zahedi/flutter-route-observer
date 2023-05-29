@@ -12,7 +12,12 @@ class NavigatorMiddleware<R extends Route<dynamic>> extends RouteObserver<R> {
     this.onReplace,
     this.onRemove,
   }) : _stack = [];
+    
+   /// Use of this navigatorKey is optional
+   /// Used to efficiently monitor and react to route changes
+   /// Enables you to implement custom behaviors or perform specific tasks during navigation transitions.
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    
   final List<R> _stack;
   final bool enableLogger;
   final OnRouteChange<R>? onPush;
